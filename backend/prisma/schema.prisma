@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - authenticated via Google OAuth
+model User {
+  id                String            @id @default(uuid())
+  googleId          String            @unique @map("google_id")
+  email             String            @unique
+  name              String
+  profilePictureUrl String?           @map("profile_picture_url")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  workouts          Workout[]
+  templates         Template[]
+  customExercises   Exercise[]        @relation("CustomExercises")
+  personalRecords   PersonalRecord[]
+
+  @@map("users")
+}
+
+// Exercise model - library of exercises
+model Exercise {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  category     String   // strength, cardio, flexibility, etc.
+  muscleGroups String[] // array of muscle groups
+  equipment    String?  // barbell, dumbbell, bodyweight, etc.
+  instructions String?  @db.Text
+  isCustom     Boolean  @default(false) @map("is_custom")
+  userId       String?  @map("user_id") // null for system exercises
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User?            @relation("CustomExercises", fields: [userId], references: [id], onDelete: Cascade)
+  sets            Set[]
+  templateExercises TemplateExercise[]
+  personalRecords PersonalRecord[]
+
+  @@map("exercises")
+}
+
+// Workout model - a workout session
+model Workout {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  name            String
+  date            DateTime @default(now())
+  notes           String?  @db.Text
+  durationMinutes Int?     @map("duration_minutes")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sets Set[]
+
+  @@index([userId, date])
+  @@map("workouts")
+}
+
+// Set model - individual sets within a workout
+model Set {
+  id         String   @id @default(uuid())
+  workoutId  String   @map("workout_id")
+  exerciseId String   @map("exercise_id")
+  setNumber  Int      @map("set_number")
+  reps       Int
+  weight     Float
+  weightUnit String   @default("lbs") @map("weight_unit") // lbs or kg
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  @@index([workoutId])
+  @@index([exerciseId])
+  @@map("sets")
+}
+
+// Template model - saved workout routines
+model Template {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  name        String
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises TemplateExercise[]
+
+  @@index([userId])
+  @@map("templates")
+}
+
+// TemplateExercise model - exercises within a template
+model TemplateExercise {
+  id           String   @id @default(uuid())
+  templateId   String   @map("template_id")
+  exerciseId   String   @map("exercise_id")
+  orderIndex   Int      @map("order_index")
+  defaultSets  Int?     @map("default_sets")
+  defaultReps  Int?     @map("default_reps")
+  defaultWeight Float?  @map("default_weight")
+  notes        String?  @db.Text
+
+  // Relations
+  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  @@index([templateId])
+  @@map("template_exercises")
+}
+
+// PersonalRecord model - track PRs per exercise
+model PersonalRecord {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  exerciseId String   @map("exercise_id")
+  weight     Float
+  weightUnit String   @default("lbs") @map("weight_unit")
+  reps       Int
+  date       DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  @@index([userId, exerciseId])
+  @@map("personal_records")
+}
