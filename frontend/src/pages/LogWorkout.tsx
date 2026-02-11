@@ -79,7 +79,6 @@ export default function LogWorkout() {
   };
 
   const addExercise = (exercise: Exercise) => {
-    // Check if already added
     if (workoutExercises.some(we => we.exercise.id === exercise.id)) {
       alert('Exercise already added to workout');
       return;
@@ -158,7 +157,6 @@ export default function LogWorkout() {
   };
 
   const saveWorkout = async () => {
-    // Validation
     if (!workoutName.trim()) {
       alert('Please enter a workout name');
       return;
@@ -169,7 +167,6 @@ export default function LogWorkout() {
       return;
     }
 
-    // Check all sets have valid data
     for (const we of workoutExercises) {
       for (const set of we.sets) {
         if (set.reps <= 0 || set.weight < 0) {
@@ -181,7 +178,6 @@ export default function LogWorkout() {
 
     setSaving(true);
     try {
-      // Flatten sets for API
       const allSets: Omit<WorkoutSet, 'id' | 'exercise'>[] = [];
 
       workoutExercises.forEach(we => {
@@ -217,246 +213,229 @@ export default function LogWorkout() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>Log Workout</h1>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Log Workout</h1>
 
-      {/* Workout Metadata */}
-      <div style={{ marginBottom: '30px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            Workout Name *
-            <input
-              type="text"
-              value={workoutName}
-              onChange={(e) => setWorkoutName(e.target.value)}
-              placeholder="e.g., Chest & Triceps"
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-            />
-          </label>
+      {/* Workout Metadata Card */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h5 className="text-xl font-semibold text-gray-900 mb-4">Workout Details</h5>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Workout Name *</label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={workoutName}
+            onChange={(e) => setWorkoutName(e.target.value)}
+            placeholder="e.g., Chest & Triceps"
+          />
         </div>
 
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            Date *
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
             <input
               type="date"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={workoutDate}
               onChange={(e) => setWorkoutDate(e.target.value)}
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
-          </label>
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            Duration (minutes)
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
             <input
               type="number"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={durationMinutes || ''}
               onChange={(e) => setDurationMinutes(e.target.value ? Number(e.target.value) : undefined)}
               placeholder="Optional"
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
             />
-          </label>
+          </div>
         </div>
 
         <div>
-          <label>
-            Notes
-            <textarea
-              value={workoutNotes}
-              onChange={(e) => setWorkoutNotes(e.target.value)}
-              placeholder="How did you feel? Any observations?"
-              rows={3}
-              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-            />
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <textarea
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={workoutNotes}
+            onChange={(e) => setWorkoutNotes(e.target.value)}
+            placeholder="How did you feel? Any observations?"
+            rows={3}
+          />
         </div>
       </div>
 
       {/* Exercises Section */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <h2>Exercises</h2>
-          <button
-            onClick={() => setShowExerciseSelector(!showExerciseSelector)}
-            style={{ padding: '10px 20px', backgroundColor: '#4285f4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-          >
-            {showExerciseSelector ? 'Close' : 'Add Exercise'}
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-gray-900">Exercises</h2>
+        <button
+          onClick={() => setShowExerciseSelector(!showExerciseSelector)}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+        >
+          {showExerciseSelector ? 'Close' : 'Add Exercise'}
+        </button>
+      </div>
 
-        {/* Exercise Selector */}
-        {showExerciseSelector && (
-          <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-            <div style={{ marginBottom: '10px' }}>
-              <input
-                type="text"
-                placeholder="Search exercises..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-              />
+      {/* Exercise Selector Card */}
+      {showExerciseSelector && (
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <input
+              type="text"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search exercises..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <select
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              <option value="strength">Strength</option>
+              <option value="cardio">Cardio</option>
+              <option value="flexibility">Flexibility</option>
+            </select>
+          </div>
 
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                style={{ width: '100%', padding: '8px' }}
-              >
-                <option value="">All Categories</option>
-                <option value="strength">Strength</option>
-                <option value="cardio">Cardio</option>
-                <option value="flexibility">Flexibility</option>
-              </select>
-            </div>
-
-            <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: 'white' }}>
-              {loading ? (
-                <div style={{ padding: '20px', textAlign: 'center' }}>Loading exercises...</div>
-              ) : filteredExercises.length === 0 ? (
-                <div style={{ padding: '20px', textAlign: 'center' }}>No exercises found</div>
-              ) : (
-                filteredExercises.map(exercise => (
-                  <div
+          <div className="border border-gray-200 rounded-lg max-h-80 overflow-y-auto">
+            {loading ? (
+              <div className="text-center py-8 text-gray-600">Loading exercises...</div>
+            ) : filteredExercises.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">No exercises found</div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {filteredExercises.map(exercise => (
+                  <button
                     key={exercise.id}
                     onClick={() => addExercise(exercise)}
-                    style={{
-                      padding: '10px',
-                      borderBottom: '1px solid #eee',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
                   >
-                    <div style={{ fontWeight: 'bold' }}>{exercise.name}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
+                    <div className="font-semibold text-gray-900">{exercise.name}</div>
+                    <div className="text-sm text-gray-600">
                       {exercise.category} • {exercise.muscleGroups.join(', ')}
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Workout Exercises with Sets */}
-        {workoutExercises.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', border: '2px dashed #ddd', borderRadius: '8px', color: '#666' }}>
-            No exercises added yet. Click "Add Exercise" to get started.
-          </div>
-        ) : (
-          workoutExercises.map((we) => (
-            <div key={we.exercise.id} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h3 style={{ margin: 0 }}>{we.exercise.name}</h3>
+      {/* Workout Exercises */}
+      {workoutExercises.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <p className="text-gray-600">No exercises added yet. Click "Add Exercise" to get started.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {workoutExercises.map((we) => (
+            <div key={we.exercise.id} className="bg-white rounded-lg shadow p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h5 className="text-lg font-semibold text-gray-900">{we.exercise.name}</h5>
                 <button
                   onClick={() => removeExercise(we.exercise.id)}
-                  style={{ padding: '5px 10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
                 >
                   Remove
                 </button>
               </div>
 
-              {/* Sets Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f0f0f0' }}>
-                    <th style={{ padding: '8px', textAlign: 'left', border: '1px solid #ddd' }}>Set</th>
-                    <th style={{ padding: '8px', textAlign: 'left', border: '1px solid #ddd' }}>Reps</th>
-                    <th style={{ padding: '8px', textAlign: 'left', border: '1px solid #ddd' }}>Weight</th>
-                    <th style={{ padding: '8px', textAlign: 'left', border: '1px solid #ddd' }}>Unit</th>
-                    <th style={{ padding: '8px', textAlign: 'left', border: '1px solid #ddd' }}>Notes</th>
-                    <th style={{ padding: '8px', textAlign: 'left', border: '1px solid #ddd' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {we.sets.map((set) => (
-                    <tr key={set.setNumber}>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>{set.setNumber}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                        <input
-                          type="number"
-                          value={set.reps}
-                          onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'reps', Number(e.target.value))}
-                          style={{ width: '60px', padding: '4px' }}
-                          min="0"
-                        />
-                      </td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                        <input
-                          type="number"
-                          value={set.weight}
-                          onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'weight', Number(e.target.value))}
-                          style={{ width: '80px', padding: '4px' }}
-                          min="0"
-                          step="0.5"
-                        />
-                      </td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                        <select
-                          value={set.weightUnit}
-                          onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'weightUnit', e.target.value)}
-                          style={{ padding: '4px' }}
-                        >
-                          <option value="lbs">lbs</option>
-                          <option value="kg">kg</option>
-                        </select>
-                      </td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                        <input
-                          type="text"
-                          value={set.notes}
-                          onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'notes', e.target.value)}
-                          placeholder="Optional"
-                          style={{ width: '100%', padding: '4px' }}
-                        />
-                      </td>
-                      <td style={{ padding: '8px', border: '1px solid #ddd' }}>
-                        {we.sets.length > 1 && (
-                          <button
-                            onClick={() => removeSet(we.exercise.id, set.setNumber)}
-                            style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </td>
+              <div className="overflow-x-auto mb-4">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Set</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Reps</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Weight</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Unit</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Notes</th>
+                      <th className="py-2 px-2"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {we.sets.map((set) => (
+                      <tr key={set.setNumber} className="border-b border-gray-100">
+                        <td className="py-2 px-2 text-sm text-gray-900">{set.setNumber}</td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="number"
+                            className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            value={set.reps}
+                            onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'reps', Number(e.target.value))}
+                            min="0"
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="number"
+                            className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            value={set.weight}
+                            onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'weight', Number(e.target.value))}
+                            min="0"
+                            step="0.5"
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <select
+                            className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            value={set.weightUnit}
+                            onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'weightUnit', e.target.value)}
+                          >
+                            <option value="lbs">lbs</option>
+                            <option value="kg">kg</option>
+                          </select>
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            value={set.notes}
+                            onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'notes', e.target.value)}
+                            placeholder="Optional"
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          {we.sets.length > 1 && (
+                            <button
+                              onClick={() => removeSet(we.exercise.id, set.setNumber)}
+                              className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               <button
                 onClick={() => addSet(we.exercise.id)}
-                style={{ padding: '8px 16px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Add Set
               </button>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '30px' }}>
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 mt-6">
         <button
           onClick={() => navigate('/dashboard')}
-          style={{ padding: '12px 24px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
         >
           Cancel
         </button>
         <button
           onClick={saveWorkout}
           disabled={saving}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: saving ? '#ccc' : '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: saving ? 'not-allowed' : 'pointer',
-          }}
+          className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? 'Saving...' : 'Save Workout'}
         </button>

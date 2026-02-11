@@ -62,96 +62,82 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 my-12 text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h1>Fitness Tracker Dashboard</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <header className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Fitness Tracker Dashboard</h1>
+        <div className="flex items-center gap-4">
           {user?.profilePictureUrl && (
             <img
               src={user.profilePictureUrl}
               alt={user.name}
-              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+              className="rounded-full w-10 h-10"
             />
           )}
-          <span>Welcome, {user?.name}!</span>
-          <button onClick={handleLogout} style={{ padding: '8px 16px' }}>Logout</button>
+          <span className="text-gray-700">Welcome, {user?.name}!</span>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
-      <div style={{ marginBottom: '20px' }}>
+      <div className="mb-6">
         <button
           onClick={() => navigate('/log-workout')}
-          style={{
-            padding: '12px 24px',
-            fontSize: '16px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
         >
           + Log Workout
         </button>
       </div>
 
       <div>
-        <h2>Recent Workouts</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Recent Workouts</h2>
         {workoutsLoading ? (
-          <div>Loading workouts...</div>
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
         ) : workouts.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', border: '2px dashed #ddd', borderRadius: '8px', color: '#666' }}>
-            <p>No workouts yet. Start tracking your fitness journey!</p>
+          <div className="bg-white rounded-lg shadow p-12 text-center">
+            <p className="text-gray-600 mb-4">No workouts yet. Start tracking your fitness journey!</p>
             <button
               onClick={() => navigate('/log-workout')}
-              style={{
-                marginTop: '10px',
-                padding: '10px 20px',
-                backgroundColor: '#4285f4',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
             >
               Log Your First Workout
             </button>
           </div>
         ) : (
-          <div>
+          <div className="space-y-4">
             {workouts.map((workout) => (
-              <div
-                key={workout.id}
-                style={{
-                  marginBottom: '15px',
-                  padding: '15px',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  backgroundColor: '#f9f9f9',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
+              <div key={workout.id} className="bg-white rounded-lg shadow p-4">
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h3 style={{ margin: '0 0 5px 0' }}>{workout.name}</h3>
-                    <div style={{ fontSize: '14px', color: '#666' }}>
+                    <h5 className="text-lg font-semibold text-gray-900 mb-1">{workout.name}</h5>
+                    <p className="text-sm text-gray-600">
                       {new Date(workout.date).toLocaleDateString()}
                       {workout.durationMinutes && ` • ${workout.durationMinutes} min`}
-                    </div>
+                    </p>
                   </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => navigate(`/workout/${workout.id}`)}
-                      style={{ padding: '6px 12px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       View
                     </button>
                     <button
                       onClick={() => handleDeleteWorkout(workout.id)}
-                      style={{ padding: '6px 12px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       Delete
                     </button>
@@ -159,15 +145,14 @@ export default function Dashboard() {
                 </div>
 
                 {workout.notes && (
-                  <div style={{ fontSize: '14px', color: '#555', marginBottom: '10px', fontStyle: 'italic' }}>
-                    "{workout.notes}"
+                  <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-3">
+                    <p className="text-sm text-blue-900 italic">"{workout.notes}"</p>
                   </div>
                 )}
 
-                <div style={{ fontSize: '14px' }}>
-                  <strong>Exercises:</strong>
-                  <ul style={{ margin: '5px 0', paddingLeft: '20px' }}>
-                    {/* Group sets by exercise */}
+                <div>
+                  <strong className="block text-gray-900 mb-2">Exercises:</strong>
+                  <ul className="list-disc list-inside text-gray-700">
                     {Object.entries(
                       workout.sets.reduce((acc, set) => {
                         const exerciseName = set.exercise.name;
