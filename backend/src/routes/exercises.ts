@@ -92,4 +92,73 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
   }
 });
 
+// PUT /api/exercises/:id - Update custom exercise
+router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as any).id;
+    const { id } = req.params;
+    const { name, description, category, muscleGroups, equipment, instructions } = req.body;
+
+    // Check if exercise exists and belongs to user
+    const existingExercise = await prisma.exercise.findUnique({
+      where: { id },
+    });
+
+    if (!existingExercise) {
+      return res.status(404).json({ error: 'Exercise not found' });
+    }
+
+    if (!existingExercise.isCustom || existingExercise.userId !== userId) {
+      return res.status(403).json({ error: 'Cannot edit this exercise' });
+    }
+
+    const exercise = await prisma.exercise.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        category,
+        muscleGroups,
+        equipment,
+        instructions,
+      },
+    });
+
+    res.json({ exercise });
+  } catch (error) {
+    console.error('Error updating exercise:', error);
+    res.status(500).json({ error: 'Failed to update exercise' });
+  }
+});
+
+// DELETE /api/exercises/:id - Delete custom exercise
+router.delete('/:id', isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as any).id;
+    const { id } = req.params;
+
+    // Check if exercise exists and belongs to user
+    const existingExercise = await prisma.exercise.findUnique({
+      where: { id },
+    });
+
+    if (!existingExercise) {
+      return res.status(404).json({ error: 'Exercise not found' });
+    }
+
+    if (!existingExercise.isCustom || existingExercise.userId !== userId) {
+      return res.status(403).json({ error: 'Cannot delete this exercise' });
+    }
+
+    await prisma.exercise.delete({
+      where: { id },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting exercise:', error);
+    res.status(500).json({ error: 'Failed to delete exercise' });
+  }
+});
+
 export default router;

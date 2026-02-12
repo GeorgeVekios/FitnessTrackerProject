@@ -46,4 +46,15 @@ export const exerciseService = {
     const response = await api.post('/api/exercises', data);
     return response.data.exercise;
   },
+
+  // Update custom exercise
+  async updateExercise(id: string, data: Partial<CreateExerciseData>): Promise<Exercise> {
+    const response = await api.put(`/api/exercises/${id}`, data);
+    return response.data.exercise;
+  },
+
+  // Delete custom exercise
+  async deleteExercise(id: string): Promise<void> {
+    await api.delete(`/api/exercises/${id}`);
+  },
 };

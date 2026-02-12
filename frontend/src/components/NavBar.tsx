@@ -22,6 +22,7 @@ export default function NavBar({ user }: NavBarProps) {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '🏠' },
     { path: '/log-workout', label: 'Log Workout', icon: '➕' },
+    { path: '/exercises', label: 'Exercises', icon: '🏋️' },
     { path: '/templates', label: 'Templates', icon: '📋' },
     { path: '/analytics', label: 'Analytics', icon: '📊' },
   ];

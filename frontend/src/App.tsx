@@ -6,6 +6,7 @@ import LogWorkout from './pages/LogWorkout';
 import WorkoutDetail from './pages/WorkoutDetail';
 import Templates from './pages/Templates';
 import Analytics from './pages/Analytics';
+import Exercises from './pages/Exercises';
 import './App.css';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/workout/:id" element={<WorkoutDetail />} />
         <Route path="/templates" element={<Templates />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/exercises" element={<Exercises />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
