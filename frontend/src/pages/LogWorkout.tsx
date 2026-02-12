@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { authService, type User } from '../services/auth';
 import { exerciseService, type Exercise } from '../services/exercises';
 import { workoutService, type CreateWorkoutData, type WorkoutSet } from '../services/workouts';
 import { templateService } from '../services/templates';
+import NavBar from '../components/NavBar';
 
 // Interface for client-side set (before saving)
 interface WorkoutExercise {
@@ -22,6 +25,9 @@ export default function LogWorkout() {
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get('template');
   const isEditMode = !!id;
+
+  // User state
+  const [user, setUser] = useState<User | null>(null);
 
   // Workout metadata
   const [workoutName, setWorkoutName] = useState('');
@@ -47,6 +53,19 @@ export default function LogWorkout() {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
+
+  // Check authentication on mount
+  useEffect(() => {
+    const fetchUser = async () => {
+      const currentUser = await authService.getCurrentUser();
+      if (!currentUser) {
+        navigate('/login');
+      } else {
+        setUser(currentUser);
+      }
+    };
+    fetchUser();
+  }, [navigate]);
 
   // Load exercises on mount
   useEffect(() => {
@@ -79,7 +98,7 @@ export default function LogWorkout() {
       setAvailableExercises(exercises);
     } catch (error) {
       console.error('Failed to load exercises:', error);
-      alert('Failed to load exercises');
+      toast.error('Failed to load exercises');
     } finally {
       setLoading(false);
     }
@@ -141,7 +160,7 @@ export default function LogWorkout() {
       setWorkoutExercises(exercises);
     } catch (error) {
       console.error('Failed to load workout:', error);
-      alert('Failed to load workout for editing');
+      toast.error('Failed to load workout for editing');
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -171,7 +190,7 @@ export default function LogWorkout() {
       setWorkoutExercises(exercises);
     } catch (error) {
       console.error('Failed to load template:', error);
-      alert('Failed to load template');
+      toast.error('Failed to load template');
     } finally {
       setLoading(false);
     }
@@ -179,12 +198,12 @@ export default function LogWorkout() {
 
   const saveAsTemplate = async () => {
     if (!templateName.trim()) {
-      alert('Please enter a template name');
+      toast.error('Please enter a template name');
       return;
     }
 
     if (workoutExercises.length === 0) {
-      alert('Please add at least one exercise to save as template');
+      toast.error('Please add at least one exercise to save as template');
       return;
     }
 
@@ -210,19 +229,19 @@ export default function LogWorkout() {
         }),
       });
 
-      alert('Template saved successfully!');
+      toast.success('Template saved successfully!');
       setShowTemplateModal(false);
       setTemplateName('');
       setTemplateDescription('');
     } catch (error) {
       console.error('Failed to save template:', error);
-      alert('Failed to save template');
+      toast.error('Failed to save template');
     }
   };
 
   const addExercise = (exercise: Exercise) => {
     if (workoutExercises.some(we => we.exercise.id === exercise.id)) {
-      alert('Exercise already added to workout');
+      toast.error('Exercise already added to workout');
       return;
     }
 
@@ -300,19 +319,19 @@ export default function LogWorkout() {
 
   const saveWorkout = async () => {
     if (!workoutName.trim()) {
-      alert('Please enter a workout name');
+      toast.error('Please enter a workout name');
       return;
     }
 
     if (workoutExercises.length === 0) {
-      alert('Please add at least one exercise');
+      toast.error('Please add at least one exercise');
       return;
     }
 
     for (const we of workoutExercises) {
       for (const set of we.sets) {
         if (set.reps <= 0 || set.weight < 0) {
-          alert(`Invalid set data for ${we.exercise.name}`);
+          toast.error(`Invalid set data for ${we.exercise.name}`);
           return;
         }
       }
@@ -345,25 +364,27 @@ export default function LogWorkout() {
 
       if (isEditMode && id) {
         await workoutService.updateWorkout(id, workoutData);
-        alert('Workout updated successfully!');
+        toast.success('Workout updated successfully!');
       } else {
         await workoutService.createWorkout(workoutData);
-        alert('Workout saved successfully!');
+        toast.success('Workout saved successfully!');
       }
       navigate('/dashboard');
     } catch (error) {
       console.error('Failed to save workout:', error);
-      alert('Failed to save workout. Please try again.');
+      toast.error('Failed to save workout. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">
-        {isEditMode ? 'Edit Workout' : 'Log Workout'}
-      </h1>
+    <>
+      <NavBar user={user} />
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+          {isEditMode ? 'Edit Workout' : 'Log Workout'}
+        </h1>
 
       {/* Workout Metadata Card */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -574,7 +595,7 @@ export default function LogWorkout() {
       )}
 
       {/* Action Buttons */}
-      <div className="flex justify-between items-center mt-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mt-6">
         <button
           onClick={() => setShowTemplateModal(true)}
           disabled={workoutExercises.length === 0}
@@ -582,17 +603,17 @@ export default function LogWorkout() {
         >
           Save as Template
         </button>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 sm:flex-none px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={saveWorkout}
             disabled={saving}
-            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : isEditMode ? 'Update Workout' : 'Save Workout'}
           </button>
@@ -652,6 +673,7 @@ export default function LogWorkout() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
