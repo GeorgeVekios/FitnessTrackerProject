@@ -24,7 +24,7 @@ passport.use(
               googleId: profile.id,
               email: profile.emails?.[0]?.value || '',
               name: profile.displayName,
-              profilePictureUrl: profile.photos?.[0]?.value,
+              profilePictureUrl: profile.photos?.[0]?.value ?? null,
             },
           });
         } else {
@@ -33,7 +33,7 @@ passport.use(
             where: { id: user.id },
             data: {
               name: profile.displayName,
-              profilePictureUrl: profile.photos?.[0]?.value,
+              profilePictureUrl: profile.photos?.[0]?.value ?? null,
             },
           });
         }

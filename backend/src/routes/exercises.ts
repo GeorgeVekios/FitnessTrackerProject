@@ -96,7 +96,7 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
 router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, description, category, muscleGroups, equipment, instructions } = req.body;
 
     // Check if exercise exists and belongs to user
@@ -135,7 +135,7 @@ router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
 router.delete('/:id', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     // Check if exercise exists and belongs to user
     const existingExercise = await prisma.exercise.findUnique({

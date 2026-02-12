@@ -53,7 +53,7 @@ router.get('/', isAuthenticated, async (req: Request, res: Response) => {
 router.get('/:id', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const workout = await prisma.workout.findFirst({
       where: { id, userId },
@@ -154,7 +154,7 @@ router.post('/', isAuthenticated, async (req: Request, res: Response) => {
 router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, date, notes, durationMinutes, sets } = req.body;
 
     // Check ownership
@@ -220,7 +220,7 @@ router.put('/:id', isAuthenticated, async (req: Request, res: Response) => {
 router.delete('/:id', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     // Check ownership
     const workout = await prisma.workout.findFirst({

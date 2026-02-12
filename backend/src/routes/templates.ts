@@ -37,7 +37,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const template = await prisma.template.findFirst({
       where: {
@@ -116,7 +116,7 @@ router.post('/', isAuthenticated, async (req, res) => {
 router.put('/:id', isAuthenticated, async (req, res) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, description, exercises } = req.body;
 
     // Verify template belongs to user
@@ -180,7 +180,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
 router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
     const userId = (req.user as any).id;
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const template = await prisma.template.findFirst({
       where: { id, userId },
