@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { exerciseService, type Exercise } from '../services/exercises';
 import { workoutService, type CreateWorkoutData, type WorkoutSet } from '../services/workouts';
+import { templateService } from '../services/templates';
 
 // Interface for client-side set (before saving)
 interface WorkoutExercise {
@@ -18,6 +19,8 @@ interface WorkoutExercise {
 export default function LogWorkout() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const templateId = searchParams.get('template');
   const isEditMode = !!id;
 
   // Workout metadata
@@ -40,6 +43,11 @@ export default function LogWorkout() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Template modal state
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
+
   // Load exercises on mount
   useEffect(() => {
     loadExercises();
@@ -56,6 +64,13 @@ export default function LogWorkout() {
       loadWorkoutForEdit(id);
     }
   }, [id, isEditMode]);
+
+  // Load from template if template ID is provided
+  useEffect(() => {
+    if (templateId) {
+      loadFromTemplate(templateId);
+    }
+  }, [templateId]);
 
   const loadExercises = async () => {
     setLoading(true);
@@ -130,6 +145,78 @@ export default function LogWorkout() {
       navigate('/dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFromTemplate = async (templateId: string) => {
+    setLoading(true);
+    try {
+      const template = await templateService.getTemplate(templateId);
+
+      // Set workout name from template
+      setWorkoutName(template.name);
+
+      // Convert template exercises to workout exercises
+      const exercises: WorkoutExercise[] = template.exercises.map(te => ({
+        exercise: te.exercise,
+        sets: Array.from({ length: te.defaultSets || 3 }, (_, i) => ({
+          setNumber: i + 1,
+          reps: te.defaultReps || 0,
+          weight: te.defaultWeight || 0,
+          weightUnit: 'lbs' as const,
+          notes: '',
+        })),
+      }));
+
+      setWorkoutExercises(exercises);
+    } catch (error) {
+      console.error('Failed to load template:', error);
+      alert('Failed to load template');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveAsTemplate = async () => {
+    if (!templateName.trim()) {
+      alert('Please enter a template name');
+      return;
+    }
+
+    if (workoutExercises.length === 0) {
+      alert('Please add at least one exercise to save as template');
+      return;
+    }
+
+    try {
+      await templateService.createTemplate({
+        name: templateName,
+        description: templateDescription || undefined,
+        exercises: workoutExercises.map((we, index) => {
+          // Calculate average reps and weight from sets
+          const avgReps = Math.round(
+            we.sets.reduce((sum, set) => sum + set.reps, 0) / we.sets.length
+          );
+          const avgWeight =
+            we.sets.reduce((sum, set) => sum + set.weight, 0) / we.sets.length;
+
+          return {
+            exerciseId: we.exercise.id,
+            orderIndex: index,
+            defaultSets: we.sets.length,
+            defaultReps: avgReps,
+            defaultWeight: avgWeight,
+          };
+        }),
+      });
+
+      alert('Template saved successfully!');
+      setShowTemplateModal(false);
+      setTemplateName('');
+      setTemplateDescription('');
+    } catch (error) {
+      console.error('Failed to save template:', error);
+      alert('Failed to save template');
     }
   };
 
@@ -487,21 +574,84 @@ export default function LogWorkout() {
       )}
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-3 mt-6">
+      <div className="flex justify-between items-center mt-6">
         <button
-          onClick={() => navigate('/dashboard')}
-          className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+          onClick={() => setShowTemplateModal(true)}
+          disabled={workoutExercises.length === 0}
+          className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Cancel
+          Save as Template
         </button>
-        <button
-          onClick={saveWorkout}
-          disabled={saving}
-          className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? 'Saving...' : isEditMode ? 'Update Workout' : 'Save Workout'}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={saveWorkout}
+            disabled={saving}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Saving...' : isEditMode ? 'Update Workout' : 'Save Workout'}
+          </button>
+        </div>
       </div>
+
+      {/* Save as Template Modal */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Save as Template</h3>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Template Name *
+              </label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="e.g., Push Day, Pull Day, Leg Day"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description (Optional)
+              </label>
+              <textarea
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={templateDescription}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                placeholder="Brief description of this template..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowTemplateModal(false);
+                  setTemplateName('');
+                  setTemplateDescription('');
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveAsTemplate}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+              >
+                Save Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

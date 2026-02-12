@@ -91,12 +91,18 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="mb-6">
+      <div className="mb-6 flex gap-3">
         <button
           onClick={() => navigate('/log-workout')}
           className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
         >
           + Log Workout
+        </button>
+        <button
+          onClick={() => navigate('/templates')}
+          className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+        >
+          Templates
         </button>
       </div>
 

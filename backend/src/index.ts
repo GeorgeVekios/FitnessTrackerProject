@@ -7,6 +7,7 @@ import passport from './config/passport';
 import authRoutes from './routes/auth';
 import exerciseRoutes from './routes/exercises';
 import workoutRoutes from './routes/workouts';
+import templateRoutes from './routes/templates';
 
 // Load environment variables
 dotenv.config();
@@ -53,6 +54,9 @@ app.use('/api/exercises', exerciseRoutes);
 
 // Workout routes
 app.use('/api/workouts', workoutRoutes);
+
+// Template routes
+app.use('/api/templates', templateRoutes);
 
 // Start server
 app.listen(PORT, () => {
