@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { authService, type User } from '../services/auth';
 import { workoutService, type Workout } from '../services/workouts';
+import { templateService } from '../services/templates';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -58,6 +59,62 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to delete workout:', error);
       alert('Failed to delete workout');
+    }
+  };
+
+  const handleSaveAsTemplate = async (workoutId: string, workoutName: string) => {
+    const templateName = window.prompt(
+      'Enter a name for this template:',
+      workoutName
+    );
+
+    if (!templateName) {
+      return;
+    }
+
+    try {
+      // Fetch full workout details
+      const workout = await workoutService.getWorkout(workoutId);
+
+      // Group sets by exercise and calculate averages
+      const exerciseGroups = workout.sets.reduce((acc, set) => {
+        if (!acc[set.exercise.id]) {
+          acc[set.exercise.id] = {
+            exerciseId: set.exercise.id,
+            sets: [],
+          };
+        }
+        acc[set.exercise.id].sets.push(set);
+        return acc;
+      }, {} as Record<string, { exerciseId: string; sets: typeof workout.sets }>);
+
+      // Convert to template exercises
+      const templateExercises = Object.values(exerciseGroups).map((group, index) => {
+        const avgReps = Math.round(
+          group.sets.reduce((sum, set) => sum + set.reps, 0) / group.sets.length
+        );
+        const avgWeight =
+          group.sets.reduce((sum, set) => sum + set.weight, 0) / group.sets.length;
+
+        return {
+          exerciseId: group.exerciseId,
+          orderIndex: index,
+          defaultSets: group.sets.length,
+          defaultReps: avgReps,
+          defaultWeight: avgWeight,
+        };
+      });
+
+      await templateService.createTemplate({
+        name: templateName,
+        description: `Template created from workout on ${new Date(workout.date).toLocaleDateString()}`,
+        exercises: templateExercises,
+      });
+
+      alert('Template created successfully!');
+    } catch (error) {
+      console.error('Failed to create template:', error);
+      alert('Failed to create template');
     }
   };
 
@@ -140,7 +197,7 @@ export default function Dashboard() {
                       {workout.durationMinutes && ` • ${workout.durationMinutes} min`}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => navigate(`/workout/${workout.id}`)}
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
@@ -152,6 +209,12 @@ export default function Dashboard() {
                       className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       Edit
+                    </button>
+                    <button
+                      onClick={() => handleSaveAsTemplate(workout.id, workout.name)}
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Save as Template
                     </button>
                     <button
                       onClick={() => handleDeleteWorkout(workout.id)}
