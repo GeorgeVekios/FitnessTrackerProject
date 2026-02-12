@@ -47,13 +47,13 @@ export default function PromptModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-w-md w-full">
+        <div className="px-6 py-4 border-b border-slate-800">
+          <h3 className="text-xl font-semibold text-slate-100">{title}</h3>
         </div>
         <div className="px-6 py-4">
-          <p className="text-gray-700 mb-4">{message}</p>
+          <p className="text-slate-300 mb-4">{message}</p>
           <input
             type="text"
             value={value}
@@ -61,20 +61,20 @@ export default function PromptModal({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             autoFocus
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-dark"
           />
         </div>
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-slate-800 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            className="btn-ghost"
           >
             {cancelText}
           </button>
           <button
             onClick={handleConfirm}
             disabled={!value.trim()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
           >
             {confirmText}
           </button>

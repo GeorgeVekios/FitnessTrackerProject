@@ -7,7 +7,6 @@ import WorkoutDetail from './pages/WorkoutDetail';
 import Templates from './pages/Templates';
 import Analytics from './pages/Analytics';
 import Exercises from './pages/Exercises';
-import './App.css';
 
 function App() {
   return (
@@ -17,22 +16,24 @@ function App() {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#fff',
-            color: '#363636',
-            padding: '16px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            background: '#1e293b',
+            color: '#f1f5f9',
+            padding: '14px 18px',
+            borderRadius: '12px',
+            border: '1px solid #334155',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+            fontSize: '14px',
           },
           success: {
             iconTheme: {
               primary: '#10b981',
-              secondary: '#fff',
+              secondary: '#1e293b',
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+              primary: '#f43f5e',
+              secondary: '#1e293b',
             },
           },
         }}

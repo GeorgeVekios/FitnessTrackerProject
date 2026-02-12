@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Eye, Pencil, BookmarkPlus, Trash2, Plus } from 'lucide-react';
 import { authService, type User } from '../services/auth';
 import { workoutService, type Workout } from '../services/workouts';
 import { templateService } from '../services/templates';
@@ -130,7 +131,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="spinner"></div>
       </div>
     );
   }
@@ -140,33 +141,34 @@ export default function Dashboard() {
       <NavBar user={user} />
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Recent Workouts</h2>
+          <h2 className="text-2xl font-semibold text-slate-100 mb-4">Recent Workouts</h2>
           {workoutsLoading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="spinner"></div>
             </div>
           ) : workouts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <p className="text-gray-600 mb-4">
+            <div className="card p-12 text-center">
+              <p className="text-slate-400 mb-4">
                 No workouts yet. Start tracking your fitness journey!
               </p>
               <button
                 onClick={() => navigate('/log-workout')}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                className="btn-primary inline-flex items-center gap-2"
               >
+                <Plus className="w-4 h-4" />
                 Log Your First Workout
               </button>
             </div>
           ) : (
             <div className="space-y-4">
               {workouts.map((workout) => (
-                <div key={workout.id} className="bg-white rounded-lg shadow p-4">
+                <div key={workout.id} className="card-hover p-4">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3">
                     <div>
-                      <h5 className="text-lg font-semibold text-gray-900 mb-1">
+                      <h5 className="text-lg font-semibold text-slate-100 mb-1">
                         {workout.name}
                       </h5>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-slate-400">
                         {new Date(workout.date).toLocaleDateString()}
                         {workout.durationMinutes && ` • ${workout.durationMinutes} min`}
                       </p>
@@ -174,14 +176,16 @@ export default function Dashboard() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => navigate(`/workout/${workout.id}`)}
-                        className="flex-1 sm:flex-none px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 btn-primary text-sm"
                       >
+                        <Eye className="w-3.5 h-3.5" />
                         View
                       </button>
                       <button
                         onClick={() => navigate(`/edit-workout/${workout.id}`)}
-                        className="flex-1 sm:flex-none px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium rounded-lg transition-all duration-200"
                       >
+                        <Pencil className="w-3.5 h-3.5" />
                         Edit
                       </button>
                       <button
@@ -192,30 +196,32 @@ export default function Dashboard() {
                             workoutName: workout.name,
                           })
                         }
-                        className="flex-1 sm:flex-none px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 btn-secondary text-sm whitespace-nowrap"
                       >
+                        <BookmarkPlus className="w-3.5 h-3.5" />
                         Save as Template
                       </button>
                       <button
                         onClick={() =>
                           setDeleteConfirm({ isOpen: true, workoutId: workout.id })
                         }
-                        className="flex-1 sm:flex-none px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 btn-danger text-sm"
                       >
+                        <Trash2 className="w-3.5 h-3.5" />
                         Delete
                       </button>
                     </div>
                   </div>
 
                   {workout.notes && (
-                    <div className="bg-blue-50 border border-blue-200 rounded p-2 mb-3">
-                      <p className="text-sm text-blue-900 italic">"{workout.notes}"</p>
+                    <div className="bg-cyan-950/30 border border-cyan-900/50 rounded-lg p-3 mb-3">
+                      <p className="text-sm text-cyan-300 italic">"{workout.notes}"</p>
                     </div>
                   )}
 
                   <div>
-                    <strong className="block text-gray-900 mb-2">Exercises:</strong>
-                    <ul className="list-disc list-inside text-gray-700">
+                    <span className="block text-sm font-medium text-slate-300 mb-2">Exercises:</span>
+                    <ul className="space-y-1 text-slate-400">
                       {Object.entries(
                         workout.sets.reduce(
                           (acc, set) => {
@@ -229,7 +235,8 @@ export default function Dashboard() {
                           {} as Record<string, typeof workout.sets>
                         )
                       ).map(([exerciseName, sets]) => (
-                        <li key={exerciseName}>
+                        <li key={exerciseName} className="flex items-center gap-2 text-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
                           {exerciseName}: {sets.length} set{sets.length > 1 ? 's' : ''}
                         </li>
                       ))}
@@ -250,7 +257,7 @@ export default function Dashboard() {
         title="Delete Workout"
         message="Are you sure you want to delete this workout? This action cannot be undone."
         confirmText="Delete"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-500 hover:shadow-glow-rose"
       />
 
       {/* Save as Template Prompt Modal */}

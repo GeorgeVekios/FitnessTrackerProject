@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Plus, Search, Pencil, Trash2, X } from 'lucide-react';
 import { authService, type User } from '../services/auth';
 import { exerciseService, type Exercise } from '../services/exercises';
 import NavBar from '../components/NavBar';
@@ -119,7 +120,7 @@ export default function Exercises() {
     setFormData({
       name: exercise.name,
       description: exercise.description || '',
-      category: exercise.category,
+      category: exercise.category as 'strength' | 'cardio' | 'flexibility',
       muscleGroups: [...exercise.muscleGroups],
       equipment: exercise.equipment || '',
     });
@@ -206,7 +207,7 @@ export default function Exercises() {
       <>
         <NavBar user={user} />
         <div className="min-h-screen flex items-center justify-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="spinner"></div>
         </div>
       </>
     );
@@ -218,31 +219,35 @@ export default function Exercises() {
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Exercise Library</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-slate-100 mb-2">Exercise Library</h1>
+            <p className="text-slate-400">
               Browse exercises or create your own custom exercises
             </p>
           </div>
           <button
             onClick={handleCreateExercise}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            className="btn-primary flex items-center gap-2"
           >
+            <Plus className="w-4 h-4" />
             Create Custom Exercise
           </button>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="card p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              type="text"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Search exercises..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                className="input-dark pl-10"
+                placeholder="Search exercises..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <select
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="select-dark"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
@@ -252,7 +257,7 @@ export default function Exercises() {
               <option value="flexibility">Flexibility</option>
             </select>
             <select
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="select-dark"
               value={muscleGroupFilter}
               onChange={(e) => setMuscleGroupFilter(e.target.value)}
             >
@@ -271,7 +276,7 @@ export default function Exercises() {
                 setCategoryFilter('');
                 setMuscleGroupFilter('');
               }}
-              className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+              className="mt-3 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
             >
               Clear filters
             </button>
@@ -280,27 +285,28 @@ export default function Exercises() {
 
         {/* Exercise List */}
         {filteredExercises.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-600">No exercises found</p>
+          <div className="card p-12 text-center">
+            <p className="text-slate-400">No exercises found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredExercises.map((exercise) => (
               <div
                 key={exercise.id}
-                className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow"
+                className="card-hover p-4"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-slate-100">
                     {exercise.name}
                   </h3>
                   {exercise.isCustom && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditExercise(exercise)}
-                        className="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-medium rounded transition-colors"
+                        className="p-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded transition-colors"
+                        title="Edit"
                       >
-                        Edit
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() =>
@@ -310,32 +316,33 @@ export default function Exercises() {
                             exerciseName: exercise.name,
                           })
                         }
-                        className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors"
+                        className="p-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded transition-colors"
+                        title="Delete"
                       >
-                        Delete
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   )}
                 </div>
                 {exercise.description && (
-                  <p className="text-sm text-gray-600 mb-2">{exercise.description}</p>
+                  <p className="text-sm text-slate-400 mb-2">{exercise.description}</p>
                 )}
                 <div className="flex flex-wrap gap-2 mb-2">
-                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                  <span className="inline-block px-2 py-1 bg-cyan-950/50 text-cyan-300 text-xs font-medium rounded">
                     {exercise.category}
                   </span>
                   {exercise.isCustom && (
-                    <span className="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded">
+                    <span className="inline-block px-2 py-1 bg-violet-950/50 text-violet-300 text-xs font-medium rounded">
                       Custom
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-gray-700">
-                  <strong>Muscle Groups:</strong> {exercise.muscleGroups.join(', ')}
+                <div className="text-sm text-slate-300">
+                  <span className="font-semibold text-slate-400">Muscle Groups:</span> {exercise.muscleGroups.join(', ')}
                 </div>
                 {exercise.equipment && (
-                  <div className="text-sm text-gray-700 mt-1">
-                    <strong>Equipment:</strong> {exercise.equipment}
+                  <div className="text-sm text-slate-300 mt-1">
+                    <span className="font-semibold text-slate-400">Equipment:</span> {exercise.equipment}
                   </div>
                 )}
               </div>
@@ -353,12 +360,12 @@ export default function Exercises() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="label-dark">
               Exercise Name *
             </label>
             <input
               type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-dark"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Dumbbell Shoulder Press"
@@ -366,11 +373,11 @@ export default function Exercises() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="label-dark">
               Description
             </label>
             <textarea
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-dark"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -381,11 +388,11 @@ export default function Exercises() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="label-dark">
               Category *
             </label>
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="select-dark"
               value={formData.category}
               onChange={(e) =>
                 setFormData({
@@ -401,13 +408,13 @@ export default function Exercises() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="label-dark">
               Muscle Groups *
             </label>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input-dark"
                 value={muscleGroupInput}
                 onChange={(e) => setMuscleGroupInput(e.target.value)}
                 onKeyPress={(e) => {
@@ -420,8 +427,9 @@ export default function Exercises() {
               />
               <button
                 onClick={handleAddMuscleGroup}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                className="btn-primary flex items-center gap-1 whitespace-nowrap"
               >
+                <Plus className="w-4 h-4" />
                 Add
               </button>
             </div>
@@ -430,14 +438,14 @@ export default function Exercises() {
                 {formData.muscleGroups.map((mg) => (
                   <span
                     key={mg}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-cyan-950/50 text-cyan-300 text-sm font-medium rounded"
                   >
                     {mg}
                     <button
                       onClick={() => handleRemoveMuscleGroup(mg)}
-                      className="text-blue-600 hover:text-blue-800 font-bold"
+                      className="text-cyan-400 hover:text-cyan-200 transition-colors"
                     >
-                      ×
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 ))}
@@ -446,12 +454,12 @@ export default function Exercises() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="label-dark">
               Equipment
             </label>
             <input
               type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-dark"
               value={formData.equipment}
               onChange={(e) =>
                 setFormData({ ...formData, equipment: e.target.value })
@@ -463,13 +471,13 @@ export default function Exercises() {
           <div className="flex justify-end gap-3 pt-4">
             <button
               onClick={() => setShowModal(false)}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="btn-ghost"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="btn-primary"
             >
               {editingExercise ? 'Update Exercise' : 'Create Exercise'}
             </button>
@@ -487,7 +495,7 @@ export default function Exercises() {
         title="Delete Exercise"
         message={`Are you sure you want to delete "${deleteConfirm.exerciseName}"? This action cannot be undone.`}
         confirmText="Delete"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-500"
       />
     </>
   );

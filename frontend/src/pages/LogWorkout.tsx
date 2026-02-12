@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Plus, X, BookmarkPlus, Save, Search } from 'lucide-react';
 import { authService, type User } from '../services/auth';
 import { exerciseService, type Exercise } from '../services/exercises';
 import { workoutService, type CreateWorkoutData, type WorkoutSet } from '../services/workouts';
@@ -382,19 +383,19 @@ export default function LogWorkout() {
     <>
       <NavBar user={user} />
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        <h1 className="text-3xl font-bold text-slate-100 mb-6">
           {isEditMode ? 'Edit Workout' : 'Log Workout'}
         </h1>
 
       {/* Workout Metadata Card */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h5 className="text-xl font-semibold text-gray-900 mb-4">Workout Details</h5>
+      <div className="card p-6 mb-6">
+        <h5 className="text-xl font-semibold text-slate-100 mb-4">Workout Details</h5>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Workout Name *</label>
+          <label className="label-dark">Workout Name *</label>
           <input
             type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-dark"
             value={workoutName}
             onChange={(e) => setWorkoutName(e.target.value)}
             placeholder="e.g., Chest & Triceps"
@@ -403,19 +404,19 @@ export default function LogWorkout() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+            <label className="label-dark">Date *</label>
             <input
               type="date"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-dark"
               value={workoutDate}
               onChange={(e) => setWorkoutDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
+            <label className="label-dark">Duration (minutes)</label>
             <input
               type="number"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-dark"
               value={durationMinutes || ''}
               onChange={(e) => setDurationMinutes(e.target.value ? Number(e.target.value) : undefined)}
               placeholder="Optional"
@@ -424,9 +425,9 @@ export default function LogWorkout() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <label className="label-dark">Notes</label>
           <textarea
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-dark"
             value={workoutNotes}
             onChange={(e) => setWorkoutNotes(e.target.value)}
             placeholder="How did you feel? Any observations?"
@@ -437,28 +438,41 @@ export default function LogWorkout() {
 
       {/* Exercises Section */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-gray-900">Exercises</h2>
+        <h2 className="text-2xl font-semibold text-slate-100">Exercises</h2>
         <button
           onClick={() => setShowExerciseSelector(!showExerciseSelector)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+          className={showExerciseSelector ? 'btn-ghost' : 'btn-primary inline-flex items-center gap-2'}
         >
-          {showExerciseSelector ? 'Close' : 'Add Exercise'}
+          {showExerciseSelector ? (
+            <>
+              <X className="w-4 h-4" />
+              Close
+            </>
+          ) : (
+            <>
+              <Plus className="w-4 h-4" />
+              Add Exercise
+            </>
+          )}
         </button>
       </div>
 
       {/* Exercise Selector Card */}
       {showExerciseSelector && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="card p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Search exercises..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                className="input-dark pl-10"
+                placeholder="Search exercises..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <select
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="select-dark"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
@@ -469,21 +483,21 @@ export default function LogWorkout() {
             </select>
           </div>
 
-          <div className="border border-gray-200 rounded-lg max-h-80 overflow-y-auto">
+          <div className="border border-slate-700 rounded-lg max-h-80 overflow-y-auto">
             {loading ? (
-              <div className="text-center py-8 text-gray-600">Loading exercises...</div>
+              <div className="text-center py-8 text-slate-400">Loading exercises...</div>
             ) : filteredExercises.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No exercises found</div>
+              <div className="text-center py-8 text-slate-500">No exercises found</div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-slate-800">
                 {filteredExercises.map(exercise => (
                   <button
                     key={exercise.id}
                     onClick={() => addExercise(exercise)}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors"
                   >
-                    <div className="font-semibold text-gray-900">{exercise.name}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="font-semibold text-slate-100">{exercise.name}</div>
+                    <div className="text-sm text-slate-400">
                       {exercise.category} • {exercise.muscleGroups.join(', ')}
                     </div>
                   </button>
@@ -496,19 +510,20 @@ export default function LogWorkout() {
 
       {/* Workout Exercises */}
       {workoutExercises.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-600">No exercises added yet. Click "Add Exercise" to get started.</p>
+        <div className="card p-12 text-center">
+          <p className="text-slate-400">No exercises added yet. Click "Add Exercise" to get started.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {workoutExercises.map((we) => (
-            <div key={we.exercise.id} className="bg-white rounded-lg shadow p-6">
+            <div key={we.exercise.id} className="card p-4 sm:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h5 className="text-lg font-semibold text-gray-900">{we.exercise.name}</h5>
+                <h5 className="text-lg font-semibold text-slate-100">{we.exercise.name}</h5>
                 <button
                   onClick={() => removeExercise(we.exercise.id)}
-                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/50 text-sm font-medium rounded-lg transition-all duration-200"
                 >
+                  <X className="w-3.5 h-3.5" />
                   Remove
                 </button>
               </div>
@@ -516,23 +531,23 @@ export default function LogWorkout() {
               <div className="overflow-x-auto mb-4">
                 <table className="min-w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Set</th>
-                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Reps</th>
-                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Weight</th>
-                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Unit</th>
-                      <th className="text-left py-2 px-2 text-sm font-medium text-gray-700">Notes</th>
+                    <tr className="border-b border-slate-700">
+                      <th className="text-left py-2 px-2 text-sm font-medium text-slate-400">Set</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-slate-400">Reps</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-slate-400">Weight</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-slate-400">Unit</th>
+                      <th className="text-left py-2 px-2 text-sm font-medium text-slate-400">Notes</th>
                       <th className="py-2 px-2"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {we.sets.map((set) => (
-                      <tr key={set.setNumber} className="border-b border-gray-100">
-                        <td className="py-2 px-2 text-sm text-gray-900">{set.setNumber}</td>
+                      <tr key={set.setNumber} className="border-b border-slate-800/50">
+                        <td className="py-2 px-2 text-sm text-slate-300 font-medium">{set.setNumber}</td>
                         <td className="py-2 px-2">
                           <input
                             type="number"
-                            className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-20 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500"
                             value={set.reps}
                             onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'reps', Number(e.target.value))}
                             min="0"
@@ -541,7 +556,7 @@ export default function LogWorkout() {
                         <td className="py-2 px-2">
                           <input
                             type="number"
-                            className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-24 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500"
                             value={set.weight}
                             onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'weight', Number(e.target.value))}
                             min="0"
@@ -550,7 +565,7 @@ export default function LogWorkout() {
                         </td>
                         <td className="py-2 px-2">
                           <select
-                            className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-20 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500"
                             value={set.weightUnit}
                             onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'weightUnit', e.target.value)}
                           >
@@ -561,7 +576,7 @@ export default function LogWorkout() {
                         <td className="py-2 px-2">
                           <input
                             type="text"
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500"
                             value={set.notes}
                             onChange={(e) => updateSet(we.exercise.id, set.setNumber, 'notes', e.target.value)}
                             placeholder="Optional"
@@ -571,9 +586,9 @@ export default function LogWorkout() {
                           {we.sets.length > 1 && (
                             <button
                               onClick={() => removeSet(we.exercise.id, set.setNumber)}
-                              className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                              className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-950/50 rounded-lg transition-all duration-200"
                             >
-                              ×
+                              <X className="w-4 h-4" />
                             </button>
                           )}
                         </td>
@@ -585,8 +600,9 @@ export default function LogWorkout() {
 
               <button
                 onClick={() => addSet(we.exercise.id)}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                className="btn-success text-sm inline-flex items-center gap-1.5"
               >
+                <Plus className="w-4 h-4" />
                 Add Set
               </button>
             </div>
@@ -599,22 +615,24 @@ export default function LogWorkout() {
         <button
           onClick={() => setShowTemplateModal(true)}
           disabled={workoutExercises.length === 0}
-          className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-secondary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
         >
+          <BookmarkPlus className="w-4 h-4" />
           Save as Template
         </button>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex-1 sm:flex-none px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 sm:flex-none btn-ghost"
           >
             Cancel
           </button>
           <button
             onClick={saveWorkout}
             disabled={saving}
-            className="flex-1 sm:flex-none px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-none btn-success inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
           >
+            <Save className="w-4 h-4" />
             {saving ? 'Saving...' : isEditMode ? 'Update Workout' : 'Save Workout'}
           </button>
         </div>
@@ -622,17 +640,17 @@ export default function LogWorkout() {
 
       {/* Save as Template Modal */}
       {showTemplateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Save as Template</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold text-slate-100 mb-4">Save as Template</h3>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="label-dark">
                 Template Name *
               </label>
               <input
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-dark"
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 placeholder="e.g., Push Day, Pull Day, Leg Day"
@@ -640,11 +658,11 @@ export default function LogWorkout() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="label-dark">
                 Description (Optional)
               </label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="input-dark"
                 value={templateDescription}
                 onChange={(e) => setTemplateDescription(e.target.value)}
                 placeholder="Brief description of this template..."
@@ -659,13 +677,13 @@ export default function LogWorkout() {
                   setTemplateName('');
                   setTemplateDescription('');
                 }}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="btn-ghost"
               >
                 Cancel
               </button>
               <button
                 onClick={saveAsTemplate}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                className="btn-secondary"
               >
                 Save Template
               </button>
