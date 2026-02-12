@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { exerciseService, type Exercise } from '../services/exercises';
 import { workoutService, type CreateWorkoutData, type WorkoutSet } from '../services/workouts';
 
@@ -17,6 +17,8 @@ interface WorkoutExercise {
 
 export default function LogWorkout() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditMode = !!id;
 
   // Workout metadata
   const [workoutName, setWorkoutName] = useState('');
@@ -48,6 +50,13 @@ export default function LogWorkout() {
     filterExercises();
   }, [searchTerm, categoryFilter, availableExercises]);
 
+  // Load workout data if in edit mode
+  useEffect(() => {
+    if (isEditMode && id) {
+      loadWorkoutForEdit(id);
+    }
+  }, [id, isEditMode]);
+
   const loadExercises = async () => {
     setLoading(true);
     try {
@@ -76,6 +85,52 @@ export default function LogWorkout() {
     }
 
     setFilteredExercises(filtered);
+  };
+
+  const loadWorkoutForEdit = async (workoutId: string) => {
+    setLoading(true);
+    try {
+      const workout = await workoutService.getWorkout(workoutId);
+
+      // Set workout metadata
+      setWorkoutName(workout.name);
+      setWorkoutDate(new Date(workout.date).toISOString().split('T')[0]);
+      setWorkoutNotes(workout.notes || '');
+      setDurationMinutes(workout.durationMinutes || undefined);
+
+      // Group sets by exercise
+      const exerciseGroups: Record<string, WorkoutExercise> = {};
+
+      workout.sets.forEach(set => {
+        if (!exerciseGroups[set.exercise.id]) {
+          exerciseGroups[set.exercise.id] = {
+            exercise: set.exercise as Exercise,
+            sets: [],
+          };
+        }
+        exerciseGroups[set.exercise.id].sets.push({
+          setNumber: set.setNumber,
+          reps: set.reps,
+          weight: set.weight,
+          weightUnit: set.weightUnit,
+          notes: set.notes || '',
+        });
+      });
+
+      // Convert to array and sort sets by set number
+      const exercises = Object.values(exerciseGroups).map(group => ({
+        ...group,
+        sets: group.sets.sort((a, b) => a.setNumber - b.setNumber),
+      }));
+
+      setWorkoutExercises(exercises);
+    } catch (error) {
+      console.error('Failed to load workout:', error);
+      alert('Failed to load workout for editing');
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addExercise = (exercise: Exercise) => {
@@ -201,8 +256,13 @@ export default function LogWorkout() {
         sets: allSets,
       };
 
-      await workoutService.createWorkout(workoutData);
-      alert('Workout saved successfully!');
+      if (isEditMode && id) {
+        await workoutService.updateWorkout(id, workoutData);
+        alert('Workout updated successfully!');
+      } else {
+        await workoutService.createWorkout(workoutData);
+        alert('Workout saved successfully!');
+      }
       navigate('/dashboard');
     } catch (error) {
       console.error('Failed to save workout:', error);
@@ -214,7 +274,9 @@ export default function LogWorkout() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Log Workout</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        {isEditMode ? 'Edit Workout' : 'Log Workout'}
+      </h1>
 
       {/* Workout Metadata Card */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -437,7 +499,7 @@ export default function LogWorkout() {
           disabled={saving}
           className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'Saving...' : 'Save Workout'}
+          {saving ? 'Saving...' : isEditMode ? 'Update Workout' : 'Save Workout'}
         </button>
       </div>
     </div>

@@ -136,6 +136,12 @@ export default function Dashboard() {
                       View
                     </button>
                     <button
+                      onClick={() => navigate(`/edit-workout/${workout.id}`)}
+                      className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
                       onClick={() => handleDeleteWorkout(workout.id)}
                       className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
