@@ -139,27 +139,6 @@ export default function Dashboard() {
     <>
       <NavBar user={user} />
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <div className="mb-6 flex flex-wrap gap-3">
-          <button
-            onClick={() => navigate('/log-workout')}
-            className="flex-1 sm:flex-none px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-          >
-            + Log Workout
-          </button>
-          <button
-            onClick={() => navigate('/templates')}
-            className="flex-1 sm:flex-none px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
-          >
-            Templates
-          </button>
-          <button
-            onClick={() => navigate('/analytics')}
-            className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-          >
-            Analytics
-          </button>
-        </div>
-
         <div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Recent Workouts</h2>
           {workoutsLoading ? (

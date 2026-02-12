@@ -12,11 +12,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { authService, type User } from '../services/auth';
 import { analyticsService, type PersonalRecord, type SummaryStats } from '../services/analytics';
 import { exerciseService, type Exercise } from '../services/exercises';
+import NavBar from '../components/NavBar';
 
 export default function Analytics() {
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
 
   // Summary stats
   const [summary, setSummary] = useState<SummaryStats | null>(null);
@@ -39,9 +42,19 @@ export default function Analytics() {
   const [dateRange, setDateRange] = useState<'30' | '90' | '365' | 'all'>('90');
 
   useEffect(() => {
+    const fetchUser = async () => {
+      const currentUser = await authService.getCurrentUser();
+      if (!currentUser) {
+        navigate('/login');
+      } else {
+        setUser(currentUser);
+      }
+    };
+
+    fetchUser();
     loadData();
     loadExercises();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     loadFrequencyAndVolume();
@@ -132,23 +145,20 @@ export default function Analytics() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 my-12 text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <>
+        <NavBar user={user} />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics & Progress</h1>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Back to Dashboard
-        </button>
-      </header>
+    <>
+      <NavBar user={user} />
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Analytics & Progress</h1>
 
       {/* Date Range Filter */}
       <div className="mb-6 flex gap-2">
@@ -336,5 +346,6 @@ export default function Analytics() {
         )}
       </div>
     </div>
+    </>
   );
 }
