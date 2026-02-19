@@ -25,6 +25,7 @@ export const authService = {
 
   // Logout
   async logout(): Promise<void> {
-    await api.post('/api/auth/logout');
+    localStorage.removeItem('auth_token');
+    await api.post('/api/auth/logout').catch(() => {});
   },
 };
